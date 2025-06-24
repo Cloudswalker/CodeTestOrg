@@ -3,9 +3,9 @@
 namespace LogUsers
 {
     using LogComponent.Interfaces;
+    using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using System.Threading;
-
     class Program
     {
         static void Main(string[] args)
@@ -43,9 +43,17 @@ namespace LogUsers
 
         private static void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<ILogWriter>(provider =>
-                new FileLogWriter(@"C:\LogTest"));
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
 
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddSingleton<ILogWriter>(provider =>
+            {
+                var config = provider.GetRequiredService<IConfiguration>();
+                var dir = config["Logging:Directory"] ?? "C:\\DefaultLogDir";
+                return new FileLogWriter(dir);
+            });
             services.AddTransient<ILog, AsyncLog>();
         }
     }
