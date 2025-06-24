@@ -21,19 +21,19 @@ This is a test assignment implementation of a lightweight, asynchronous logging 
 ## 🧱 Project Structure
 
 /LogComponent
-├── Interfaces/
-│ ├── ILog.cs
-│ └── ILogWriter.cs
-├── AsyncLog.cs
-├── FileLogWriter.cs
-└── LogLine.cs (record type)
+	├── Interfaces/
+	│ ├── ILog.cs
+	│ └── ILogWriter.cs
+	├── AsyncLog.cs
+	├── FileLogWriter.cs
+	└── LogLine.cs (record type)
 
 /Application
-└── Program.cs (example usage)
+	└── Program.cs (example usage)
 
 /LogComponent.Tests
-└── AsyncLogTests.cs
-└──FaultyLogWriter.cs
+	└── AsyncLogTests.cs
+	└──FaultyLogWriter.cs
 
 ---
 

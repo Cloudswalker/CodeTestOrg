@@ -22,8 +22,15 @@ public class AsyncLog : ILog
 
     public void Write(string text)
     {
-        if (!_disposed && !_cts.IsCancellationRequested && !_queue.IsAddingCompleted)
-            _queue.Add(new LogLine(DateTime.Now, text));
+        try
+        {
+            if (!_disposed && !_cts.IsCancellationRequested && !_queue.IsAddingCompleted)
+                _queue.Add(new LogLine(DateTime.Now, text));
+        }
+        catch (OperationCanceledException)
+        {
+            // ignore
+        }
     }
 
     public void StopWithoutFlush()
@@ -45,6 +52,8 @@ public class AsyncLog : ILog
         {
             foreach (var logLine in _queue.GetConsumingEnumerable(_cts.Token))
             {
+                //To see how it works - uncomment the next line to add a delay
+                //Thread.Sleep(100);
                 await _logWriter.WriteAsync(logLine, _cts.Token);
             }
         }
@@ -67,9 +76,6 @@ public class AsyncLog : ILog
             {
                 StopWithFlush();
                 _cts.Cancel();
-
-                // wait for background task to finish
-                _processingTask?.Wait(1000);
             }
             catch { /* swallow */ }
         }

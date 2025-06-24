@@ -2,11 +2,13 @@
 using LogComponent.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
 
 namespace LogUsers
 {
     class Program
     {
+        private static string? _logDirectory;
         static void Main(string[] args)
         {
             Console.WriteLine("Start");
@@ -17,10 +19,10 @@ namespace LogUsers
             {
                 var logger = serviceProvider.GetRequiredService<ILog>();
 
+                //add them all
                 for (int i = 0; i < 15; i++)
                 {
                     logger.Write("Number with Flush: " + i.ToString());
-                    Thread.Sleep(50);
                 }
 
                 logger.StopWithFlush();
@@ -40,12 +42,15 @@ namespace LogUsers
                     }
                 });
                 //wait for a moment to ensure some logs are written
-                Task.Delay(300).Wait();
+                Task.Delay(500).Wait();
                 logger2.StopWithoutFlush();
                 //wait for the logging task to finish
                 loggingTask.Wait();
-                Console.WriteLine("Finished writing logs. Press Enter to exit.");
+                Console.WriteLine("Finished Part 2...");
+                Console.WriteLine("Finished writing logs. Press Enter to open Logs Directory.");
                 Console.ReadLine();
+
+                Process.Start("explorer.exe", _logDirectory ?? "C:\\DefaultLogDir");
             }
         }
 
@@ -59,8 +64,8 @@ namespace LogUsers
             services.AddSingleton<ILogWriter>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
-                var dir = config["Logging:Directory"] ?? "C:\\DefaultLogDir";
-                return new FileLogWriter(dir);
+                _logDirectory = config["Logging:Directory"] ?? "C:\\DefaultLogDir";
+                return new FileLogWriter(_logDirectory);
             });
             services.AddTransient<ILog, AsyncLog>();
         }
