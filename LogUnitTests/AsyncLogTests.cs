@@ -63,7 +63,6 @@ public class AsyncLogTests
 
         var fileLogWriter = new FileLogWriter(LogDir, () => fakeNow);
 
-
         var lineBeforeMidnight = new LogLine(fakeNow, "Before midnight");
         var lineAfterMidnight = new LogLine(AdvanceOneSecond(), "After midnight");
 
@@ -167,7 +166,7 @@ public class AsyncLogTests
         Assert.Pass("No crash occurred");
     }
 
-#region EdgeCases
+    #region EdgeCases
 
     [Test]
     public void Write_AfterStopWithoutFlush_DoesNotWriteToFile()
@@ -186,7 +185,7 @@ public class AsyncLogTests
 
     [Test]
     public void VeryLongLogLine_IsWrittenCompletely()
-    {      
+    {
         var logger = new AsyncLog(new FileLogWriter(LogDir));
 
         string longText = new string('X', 10_000);
