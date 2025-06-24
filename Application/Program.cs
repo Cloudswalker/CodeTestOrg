@@ -1,40 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LogComponent;
+﻿using LogComponent;
 
 namespace LogUsers
 {
     using LogComponent.Interfaces;
+    using Microsoft.Extensions.DependencyInjection;
     using System.Threading;
 
     class Program
     {
         static void Main(string[] args)
         {
-            ILog  logger = new AsyncLog();
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
 
-            for (int i = 0; i < 15; i++)
+            using (var serviceProvider = serviceCollection.BuildServiceProvider())
             {
-                logger.Write("Number with Flush: " + i.ToString());
-                Thread.Sleep(50);
+                var logger = serviceProvider.GetRequiredService<ILog>();
+
+                for (int i = 0; i < 15; i++)
+                {
+                    logger.Write("Number with Flush: " + i.ToString());
+                    Thread.Sleep(50);
+                }
+
+                logger.StopWithFlush();
             }
-
-            logger.StopWithFlush();
-
-            ILog logger2 = new AsyncLog();
-
-            for (int i = 50; i > 0; i--)
+            using (var serviceProvider = serviceCollection.BuildServiceProvider())
             {
-                logger2.Write("Number with No flush: " + i.ToString());
-                Thread.Sleep(20);
+                ILog logger2 = serviceProvider.GetRequiredService<ILog>();
+
+                for (int i = 50; i > 0; i--)
+                {
+                    logger2.Write("Number with No flush: " + i.ToString());
+                    Thread.Sleep(20);
+                }
+
+                logger2.StopWithoutFlush();
+
+                Console.ReadLine();
             }
+        }
 
-            logger2.StopWithoutFlush();
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            services.AddSingleton<ILogWriter>(provider =>
+                new FileLogWriter(@"C:\LogTest"));
 
-            Console.ReadLine();
+            services.AddTransient<ILog, AsyncLog>();
         }
     }
 }

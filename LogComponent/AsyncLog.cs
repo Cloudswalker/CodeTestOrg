@@ -9,9 +9,11 @@ public class AsyncLog : ILog, IDisposable
     private readonly CancellationTokenSource _cts = new();
     private readonly Task _processingTask;
 
-    public AsyncLog()
+    public AsyncLog() : this(new FileLogWriter(@"C:\LogTest")) { }
+
+    public AsyncLog(ILogWriter logWriter)
     {
-        _logWriter = new FileLogWriter("C:\\LogTest");
+        _logWriter = logWriter;
         _processingTask = Task.Run(ProcessQueueAsync);
     }
 

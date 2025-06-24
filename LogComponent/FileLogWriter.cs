@@ -8,15 +8,17 @@ namespace LogComponent
         private StreamWriter _writer;
         private DateOnly _currentDate;
         private readonly string _directory;
+        private readonly Func<DateTime> _getNow;
 
-        public FileLogWriter(string directory)
+        public FileLogWriter(string directory, Func<DateTime>? getNow = null) 
         {
             _directory = directory;
+            _getNow = getNow ?? (() => DateTime.Now);
 
             if (!Directory.Exists(_directory))
                 Directory.CreateDirectory(_directory);
 
-            _currentDate = DateOnly.FromDateTime(DateTime.Now);
+            _currentDate = DateOnly.FromDateTime(_getNow());
             _writer = CreateWriter(_currentDate);
         }
 
