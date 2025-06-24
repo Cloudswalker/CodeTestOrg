@@ -1,0 +1,25 @@
+## Ignore Visual Studio temporary files, build results, and
+## user-specific files
+
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+*.exe
+*.dll
+*.pdb
+
+# Visual Studio Code
+.vscode/
+
+# NuGet
+*.nupkg
+packages/
+/.vs
