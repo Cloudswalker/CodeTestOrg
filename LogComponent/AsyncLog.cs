@@ -22,15 +22,8 @@ public class AsyncLog : ILog
 
     public void Write(string text)
     {
-        try
-        {
-            if (!_disposed && !_cts.IsCancellationRequested && !_queue.IsAddingCompleted)
-                _queue.Add(new LogLine(DateTime.Now, text));
-        }
-        catch (OperationCanceledException)
-        {
-            // ignore
-        }
+        if (!_disposed && !_cts.IsCancellationRequested && !_queue.IsAddingCompleted)
+            _queue.Add(new LogLine(DateTime.Now, text));
     }
 
     public void StopWithoutFlush()
@@ -57,7 +50,7 @@ public class AsyncLog : ILog
                 await _logWriter.WriteAsync(logLine, _cts.Token);
             }
         }
-        catch (OperationCanceledException)
+        catch
         {
             // ignore
         }

@@ -45,7 +45,7 @@ public class AsyncLogTests
 
         // Stop with Flush ensures all logs are written
         logger.StopWithFlush();
-
+        logger.Dispose();
         // Wait for the file to be created
         var logFiles = Directory.GetFiles(LogDir);
         Assert.IsNotEmpty(logFiles, "No log files created");
@@ -88,9 +88,9 @@ public class AsyncLogTests
 
         // Stop with Flush ensures all 10 logs are written
         logger.StopWithFlush();
-
+        logger.Dispose();
         // After stopping, check that all logs are present
-        var logFiles = Directory.GetFiles(@"C:\LogTest");
+        var logFiles = Directory.GetFiles(LogDir);
         Assert.IsNotEmpty(logFiles, "No log files found");
 
         string allLogs = string.Join("\n", logFiles.Select(File.ReadAllText));
@@ -105,18 +105,25 @@ public class AsyncLogTests
     {
         using var logger = new AsyncLog();
 
-        for (int i = 0; i < 50; i++)
-        {
-            logger.Write($"Log line {i}");
-        }
 
+        var loggingTask = Task.Run(() =>
+        {
+            for (int i = 50; i > 0; i--)
+            {
+                logger.Write($"Log line {i}");
+                Thread.Sleep(20);
+            }
+        });
+        //Let's give some time it to write some logs
+        Thread.Sleep(500);
         // Stop without Flush does not guarantee all logs are written
         logger.StopWithoutFlush();
 
         // Let's give some time for async writes to complete, but not wait for full flush
-        Task.Delay(500).Wait();
+        loggingTask.Wait();
+        logger.Dispose();
 
-        var logFiles = Directory.GetFiles(@"C:\LogTest");
+        var logFiles = Directory.GetFiles(LogDir);
         Assert.IsNotEmpty(logFiles, "No log files found");
 
         string allLogs = string.Join("\n", logFiles.Select(File.ReadAllText));
@@ -140,8 +147,9 @@ public class AsyncLogTests
         });
 
         logger.StopWithFlush();
+        logger.Dispose();
 
-        var logFiles = Directory.GetFiles(@"C:\LogTest");
+        var logFiles = Directory.GetFiles(LogDir);
         Assert.IsNotEmpty(logFiles, "No log files created");
 
         string allLogs = string.Join("\n", logFiles.Select(File.ReadAllText));
@@ -161,11 +169,10 @@ public class AsyncLogTests
 
         // Call stop to give a chance for internal write
         logger.StopWithFlush();
+        logger.Dispose();
 
         // We expect no crash, so if we reach here, the test passes
         Assert.Pass("No crash occurred");
-
-        logger.Dispose();
     }
 
     #region EdgeCases
@@ -178,6 +185,7 @@ public class AsyncLogTests
 
         logger.Write("Should not be written");
         Thread.Sleep(200); // let it process any pending writes
+        logger.Dispose();
 
         var files = Directory.GetFiles(LogDir);
         string contents = files.Any() ? File.ReadAllText(files.First()) : "";
@@ -194,10 +202,11 @@ public class AsyncLogTests
         logger.Write(longText);
         logger.StopWithFlush();
 
+        logger.Dispose();
         var file = Directory.GetFiles(LogDir).First();
         string content = File.ReadAllText(file);
 
-        Assert.That(content, Does.Contain(new string('X', 5_000)));
+        Assert.That(content, Does.Contain(new string('X', 10_000)));
     }
 
     [Test]
@@ -208,8 +217,5 @@ public class AsyncLogTests
         log.Dispose();
         Assert.DoesNotThrow(() => log.Dispose());
     }
-
-
-
     #endregion
 }
