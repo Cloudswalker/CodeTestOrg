@@ -20,7 +20,7 @@ This is a test assignment implementation of a lightweight, asynchronous logging 
 
 ## 🧱 Project Structure
 
-```json
+```pgsql
 /LogComponent
 ├── Interfaces/
 │ ├── ILog.cs
