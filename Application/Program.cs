@@ -64,7 +64,7 @@ namespace LogUsers
                 .Build();
 
             services.AddSingleton<IConfiguration>(configuration);
-            services.AddSingleton<ILogWriter>(provider =>
+            services.AddTransient<ILogWriter>(provider =>
             {
                 var config = provider.GetRequiredService<IConfiguration>();
                 _logDirectory = config["Logging:Directory"] ?? "C:\\DefaultLogDir";
