@@ -7,6 +7,7 @@ using LogComponent;
 
 namespace LogUsers
 {
+    using LogComponent.Interfaces;
     using System.Threading;
 
     class Program

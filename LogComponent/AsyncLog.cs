@@ -2,7 +2,7 @@
 
 namespace LogComponent
 {
-    public class AsyncLog : ILog
+    public class AsyncLog : Interfaces.ILog
     {
         private Thread _runThread;
         private List<LogLine> _lines = new List<LogLine>();
