@@ -164,6 +164,8 @@ public class AsyncLogTests
 
         // We expect no crash, so if we reach here, the test passes
         Assert.Pass("No crash occurred");
+
+        logger.Dispose();
     }
 
     #region EdgeCases

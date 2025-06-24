@@ -10,7 +10,7 @@ namespace LogComponent
         private readonly string _directory;
         private readonly Func<DateTime> _getNow;
 
-        public FileLogWriter(string directory, Func<DateTime>? getNow = null) 
+        public FileLogWriter(string directory, Func<DateTime>? getNow = null)
         {
             _directory = directory;
             _getNow = getNow ?? (() => DateTime.Now);
@@ -48,7 +48,7 @@ namespace LogComponent
 
         private StreamWriter CreateWriter(DateOnly date)
         {
-            string filename = $"Log_{date:yyyyMMdd}_{DateTime.Now:HHmmssfff}.log";
+            string filename = $"Log_{Guid.NewGuid().GetHashCode()}_{date:yyyy-MM-dd}.log";
             string path = Path.Combine(_directory, filename);
             var stream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.Read);
             var writer = new StreamWriter(stream, Encoding.UTF8);
@@ -64,7 +64,7 @@ namespace LogComponent
             sb.Append(line.LineText());
             return sb.ToString();
         }
-
+        
         public void Dispose()
         {
             _writer?.Dispose();
