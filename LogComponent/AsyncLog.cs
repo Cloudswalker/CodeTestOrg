@@ -20,7 +20,7 @@ public class AsyncLog : ILog, IDisposable
     public void Write(string text)
     {
         if (!_queue.IsAddingCompleted)
-            _queue.Add(new LogLine { Text = text, Timestamp = DateTime.Now });
+            _queue.Add(new LogLine(DateTime.Now, text));
     }
 
     public void StopWithoutFlush()

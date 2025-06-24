@@ -1,11 +1,10 @@
 ﻿using LogComponent;
+using LogComponent.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LogUsers
 {
-    using LogComponent.Interfaces;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using System.Threading;
     class Program
     {
         static void Main(string[] args)

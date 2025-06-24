@@ -63,8 +63,9 @@ public class AsyncLogTests
 
         var fileLogWriter = new FileLogWriter(LogDir, () => fakeNow);
 
-        var lineBeforeMidnight = new LogLine { Text = "Before midnight", Timestamp = fakeNow };
-        var lineAfterMidnight = new LogLine { Text = "After midnight", Timestamp = AdvanceOneSecond() };
+
+        var lineBeforeMidnight = new LogLine(fakeNow, "Before midnight");
+        var lineAfterMidnight = new LogLine(AdvanceOneSecond(), "After midnight");
 
         // Write lines
         fileLogWriter.WriteAsync(lineBeforeMidnight, CancellationToken.None).Wait();
