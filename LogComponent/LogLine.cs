@@ -1,49 +1,21 @@
-﻿using System.Text;
+﻿namespace LogComponent;
 
-namespace LogComponent
+/// <summary>
+/// Represents a single line in the log, with a timestamp and text content.
+/// </summary>
+public record LogLine(DateTime Timestamp, string Text)
 {
     /// <summary>
-    /// This is the object that the diff. loggers (filelogger, consolelogger etc.) will operate on. The LineText() method will be called to get the text (formatted) to log
+    /// Returns a formatted version of the log line.
     /// </summary>
-    public class LogLine
+    public string LineText()
     {
-        public LogLine()
-        {
-            this.Text = "";
-        }
-
-        /// <summary>
-        /// Return a formatted line
-        /// </summary>
-        /// <returns></returns>
-        public virtual string LineText()
-        {
-            StringBuilder sb = new StringBuilder();
-
-            if (this.Text.Length > 0)
-            {
-                sb.Append(this.Text);
-                sb.Append(". ");
-            }
-
-            sb.Append(this.CreateLineText());
-
-            return sb.ToString();
-        }
-
-        public virtual string CreateLineText()
-        {
-            return "";
-        }
-
-        /// <summary>
-        /// The text to be display in logline
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <summary>
-        /// The Timestamp is initialized when the log is added. Th
-        /// </summary>
-        public virtual DateTime Timestamp { get; set; }
+        var prefix = string.IsNullOrWhiteSpace(Text) ? "" : Text + ". ";
+        return prefix + CreateLineText();
     }
+
+    /// <summary>
+    /// Override this in derived records for custom formatting.
+    /// </summary>
+    public virtual string CreateLineText() => "";
 }

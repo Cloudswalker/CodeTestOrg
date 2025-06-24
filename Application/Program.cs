@@ -1,39 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LogComponent;
+﻿using LogComponent;
+using LogComponent.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LogUsers
 {
-    using System.Threading;
-
     class Program
     {
         static void Main(string[] args)
         {
-            ILog  logger = new AsyncLog();
+            Console.WriteLine("Start");
+            var serviceCollection = new ServiceCollection();
+            ConfigureServices(serviceCollection);
 
-            for (int i = 0; i < 15; i++)
+            using (var serviceProvider = serviceCollection.BuildServiceProvider())
             {
-                logger.Write("Number with Flush: " + i.ToString());
-                Thread.Sleep(50);
+                var logger = serviceProvider.GetRequiredService<ILog>();
+
+                for (int i = 0; i < 15; i++)
+                {
+                    logger.Write("Number with Flush: " + i.ToString());
+                    Thread.Sleep(50);
+                }
+
+                logger.StopWithFlush();
             }
 
-            logger.StopWithFlush();
-
-            ILog logger2 = new AsyncLog();
-
-            for (int i = 50; i > 0; i--)
+            Console.WriteLine("Finished part 1...");
+            using (var serviceProvider = serviceCollection.BuildServiceProvider())
             {
-                logger2.Write("Number with No flush: " + i.ToString());
-                Thread.Sleep(20);
+                ILog logger2 = serviceProvider.GetRequiredService<ILog>();
+
+                var loggingTask = Task.Run(() =>
+                {
+                    for (int i = 50; i > 0; i--)
+                    {
+                        logger2.Write("Number with No flush: " + i.ToString());
+                        Thread.Sleep(20);
+                    }
+                });
+                //wait for a moment to ensure some logs are written
+                Task.Delay(300).Wait();
+                logger2.StopWithoutFlush();
+                //wait for the logging task to finish
+                loggingTask.Wait();
+                Console.WriteLine("Finished writing logs. Press Enter to exit.");
+                Console.ReadLine();
             }
+        }
 
-            logger2.StopWithoutFlush();
+        private static void ConfigureServices(IServiceCollection services)
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
 
-            Console.ReadLine();
+            services.AddSingleton<IConfiguration>(configuration);
+            services.AddSingleton<ILogWriter>(provider =>
+            {
+                var config = provider.GetRequiredService<IConfiguration>();
+                var dir = config["Logging:Directory"] ?? "C:\\DefaultLogDir";
+                return new FileLogWriter(dir);
+            });
+            services.AddTransient<ILog, AsyncLog>();
         }
     }
 }
