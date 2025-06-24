@@ -45,10 +45,12 @@ public class AsyncLog : ILog
         {
             foreach (var logLine in _queue.GetConsumingEnumerable(_cts.Token))
             {
+                //To see how it works - uncomment the next line to add a delay
+                //Thread.Sleep(100);
                 await _logWriter.WriteAsync(logLine, _cts.Token);
             }
         }
-        catch (OperationCanceledException)
+        catch
         {
             // ignore
         }
@@ -67,9 +69,6 @@ public class AsyncLog : ILog
             {
                 StopWithFlush();
                 _cts.Cancel();
-
-                // wait for background task to finish
-                _processingTask?.Wait(1000);
             }
             catch { /* swallow */ }
         }
