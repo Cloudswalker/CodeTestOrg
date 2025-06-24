@@ -19,7 +19,7 @@ public class AsyncLogTests
 
         var services = new ServiceCollection();
 
-        // Register the same writer to check the result
+        // Register the writer to check the result
         _faultyLogWriter = new FaultyLogWriter();
         services.AddSingleton<ILogWriter>(_ => _faultyLogWriter);
 
@@ -167,4 +167,48 @@ public class AsyncLogTests
         Assert.Pass("No crash occurred");
     }
 
+#region EdgeCases
+
+    [Test]
+    public void Write_AfterStopWithoutFlush_DoesNotWriteToFile()
+    {
+        var logger = new AsyncLog(new FileLogWriter(LogDir));
+        logger.StopWithoutFlush();
+
+        logger.Write("Should not be written");
+        Thread.Sleep(200); // let it process any pending writes
+
+        var files = Directory.GetFiles(LogDir);
+        string contents = files.Any() ? File.ReadAllText(files.First()) : "";
+
+        Assert.That(contents, Does.Not.Contain("Should not be written"));
+    }
+
+    [Test]
+    public void VeryLongLogLine_IsWrittenCompletely()
+    {      
+        var logger = new AsyncLog(new FileLogWriter(LogDir));
+
+        string longText = new string('X', 10_000);
+        logger.Write(longText);
+        logger.StopWithFlush();
+
+        var file = Directory.GetFiles(LogDir).First();
+        string content = File.ReadAllText(file);
+
+        Assert.That(content, Does.Contain(new string('X', 5_000)));
+    }
+
+    [Test]
+    public void DoubleDispose_DoesNotThrow()
+    {
+        var log = new AsyncLog(new FileLogWriter(LogDir));
+
+        log.Dispose();
+        Assert.DoesNotThrow(() => log.Dispose());
+    }
+
+
+
+    #endregion
 }
